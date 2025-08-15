@@ -1,13 +1,14 @@
 import React, { useState, useMemo, memo, useCallback } from 'react';
 import type { User, Department } from '../../types';
 
-// Memoized UserCard component to prevent unnecessary re-renders
+// Memoized UserCard component to prevent unnecessary re-renders //
 const UserCard = memo<{
   user: User;
   department?: Department;
   onClick: (user: User) => void;
 }>(({ user, department, onClick }) => {
-  // Memoize expensive calculations
+  
+  
   const isActive = useMemo(() => {
     return new Date().getTime() - new Date(user.lastLogin).getTime() < 30 * 24 * 60 * 60 * 1000;
   }, [user.lastLogin]);
@@ -77,7 +78,6 @@ export const OptimizedUserList: React.FC<OptimizedUserListProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('all');
 
-  // Create department lookup map for O(1) access
   const departmentMap = useMemo(() => {
     return departments.reduce((map, dept) => {
       map[dept.id] = dept;
@@ -85,11 +85,9 @@ export const OptimizedUserList: React.FC<OptimizedUserListProps> = ({
     }, {} as Record<string, Department>);
   }, [departments]);
 
-  // Memoize expensive filtering and sorting operations
   const processedUsers = useMemo(() => {
     let filtered = users;
 
-    // Apply filters
     if (searchTerm) {
       const lowercaseSearch = searchTerm.toLowerCase();
       filtered = filtered.filter(user => 
@@ -101,14 +99,12 @@ export const OptimizedUserList: React.FC<OptimizedUserListProps> = ({
     if (selectedDepartment !== 'all') {
       filtered = filtered.filter(user => user.department === selectedDepartment);
     }
-
-    // Sort by last login (most recent first)
     return [...filtered].sort((a, b) => 
       new Date(b.lastLogin).getTime() - new Date(a.lastLogin).getTime()
     );
   }, [users, searchTerm, selectedDepartment]);
 
-  // Memoize callbacks to prevent child re-renders
+  // Memoize callbacks to prevent child re-renders //
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   }, []);
@@ -119,20 +115,8 @@ export const OptimizedUserList: React.FC<OptimizedUserListProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Performance monitoring info */}
-      <div className="bg-blue-50 p-4 rounded-lg">
-        <h3 className="font-medium text-blue-900 mb-2">Performance Optimizations Applied:</h3>
-        <ul className="text-sm text-blue-800 space-y-1">
-          <li>• Memoized expensive calculations (date operations, filtering, sorting)</li>
-          <li>• Created department lookup map for O(1) access instead of Array.find()</li>
-          <li>• Used React.memo for UserCard to prevent unnecessary re-renders</li>
-          <li>• Memoized callbacks to prevent child component re-renders</li>
-          <li>• Moved inline styles to CSS classes to avoid object recreation</li>
-          <li>• Virtualization ready (can be added for large lists)</li>
-        </ul>
-      </div>
 
-      {/* Filters */}
+
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
           <input 
@@ -159,7 +143,6 @@ export const OptimizedUserList: React.FC<OptimizedUserListProps> = ({
         </div>
       </div>
 
-      {/* Results info */}
       <div className="text-sm text-gray-600">
         Showing {processedUsers.length} of {users.length} users
       </div>
