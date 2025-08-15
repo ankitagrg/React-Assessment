@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Search, Download } from 'lucide-react';
-import { LoadingSpinner } from '../common/LoadingSpinner';
 import { useTheme } from '../../contexts/ThemeContext';
 import type { DataTableColumn, PaginationProps, SortDirection } from '../../types';
 
