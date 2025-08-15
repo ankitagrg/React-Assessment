@@ -12,12 +12,14 @@ import { mockUsers, mockDepartments, mockProducts } from './data/mockData';
 import type { DataTableColumn, User, PaginationProps } from './types';
 import { ShoppingCart, Users, Table, Settings, Undo } from 'lucide-react';
 
-// Component to demonstrate all features
+// Component to demonstrate all features //
 const AppContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'datatable' | 'forms' | 'cart' | 'performance'>('datatable');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [users, setUsers] = useState<User[]>(mockUsers); // ✅ users in state
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [formData, setFormData] = useState({
     name: '',
@@ -26,8 +28,27 @@ const AppContent: React.FC = () => {
     password: '',
   });
 
-  const { theme, features, currentClient, setClient } = useTheme();
-  const { cart, addToCart, updateQuantity, removeItem, applyDiscount, clearCart, undo, canUndo } = useCart();
+  const { features } = useTheme();
+  const { cart, addToCart, updateQuantity, removeItem, applyDiscount, undo, canUndo } = useCart();
+
+  // Delete user
+  const handleDeleteUser = (id: string) => {
+    setUsers(prev => prev.filter(user => user.id !== id));
+  };
+
+  // Save user (edit mode)
+  const handleSaveUser = () => {
+    if (isEditMode && selectedUser) {
+      setUsers(prev =>
+        prev.map(user =>
+          user.id === selectedUser.id ? { ...selectedUser } : user
+        )
+      );
+    }
+    setIsModalOpen(false);
+    setIsEditMode(false);
+    setSelectedUser(null);
+  };
 
   // DataTable columns configuration
   const userColumns: DataTableColumn<User>[] = [
@@ -53,6 +74,7 @@ const AppContent: React.FC = () => {
               onClick={() => {
                 setSelectedUser(user);
                 setIsModalOpen(true);
+                setIsEditMode(false);
               }}
               className="text-blue-600 hover:text-blue-800 text-sm"
             >
@@ -61,7 +83,11 @@ const AppContent: React.FC = () => {
           )}
           {features.rowActions.includes('edit') && (
             <button
-              onClick={() => console.log('Edit user:', user)}
+              onClick={() => {
+                setSelectedUser(user);
+                setIsModalOpen(true);
+                setIsEditMode(true);
+              }}
               className="text-green-600 hover:text-green-800 text-sm"
             >
               Edit
@@ -69,7 +95,7 @@ const AppContent: React.FC = () => {
           )}
           {features.rowActions.includes('delete') && (
             <button
-              onClick={() => console.log('Delete user:', user)}
+              onClick={() => handleDeleteUser(user.id)}
               className="text-red-600 hover:text-red-800 text-sm"
             >
               Delete
@@ -83,7 +109,7 @@ const AppContent: React.FC = () => {
   const pagination: PaginationProps = {
     page: currentPage,
     pageSize: 10,
-    total: mockUsers.length,
+    total: users.length,
   };
 
   const handleSort = (key: string, direction: 'asc' | 'desc' | null) => {
@@ -115,18 +141,7 @@ const AppContent: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-900">
               React Assessment
             </h1>
-            
-            {/* Client Theme Switcher */}
             <div className="flex items-center gap-4">
-              <select
-                value={currentClient}
-                onChange={(e) => setClient(e.target.value)}
-                className="px-3 py-1 border border-gray-300 rounded-md text-sm"
-              >
-                <option value="default">Default Theme</option>
-                <option value="client-a">Client A Theme</option>
-                <option value="client-b">Client B Theme</option>
-              </select>
               
               {activeTab === 'cart' && (
                 <div className="flex items-center gap-2">
@@ -186,13 +201,9 @@ const AppContent: React.FC = () => {
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4">DataTable Component Demo</h2>
-              <p className="text-gray-600 mb-6">
-                A fully-featured data table with sorting, pagination, search, and export capabilities.
-                Theme and features are controlled by the current client configuration.
-              </p>
               
               <DataTable
-                data={mockUsers}
+                data={users}
                 columns={userColumns}
                 onSort={handleSort}
                 pagination={pagination}
@@ -286,9 +297,6 @@ const AppContent: React.FC = () => {
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4">Performance Optimization Demo</h2>
-              <p className="text-gray-600 mb-6">
-                Optimized user list with memoization, efficient filtering, and performance monitoring.
-              </p>
               
               <OptimizedUserList
                 users={mockUsers}
@@ -306,42 +314,49 @@ const AppContent: React.FC = () => {
       {/* Modal */}
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={selectedUser ? `User Details: ${selectedUser.name}` : 'Modal Demo'}
+        onClose={() => {
+          setIsModalOpen(false);
+          setIsEditMode(false);
+          setSelectedUser(null);
+        }}
+        title={isEditMode ? 'Edit User' : selectedUser ? `User Details: ${selectedUser.name}` : 'Modal'}
         size="medium"
       >
-        {selectedUser ? (
+        {selectedUser && isEditMode ? (
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Name</label>
-              <p className="mt-1 text-sm text-gray-900">{selectedUser.name}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <p className="mt-1 text-sm text-gray-900">{selectedUser.email}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Role</label>
-              <p className="mt-1 text-sm text-gray-900">{selectedUser.role}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Last Login</label>
-              <p className="mt-1 text-sm text-gray-900">
-                {new Date(selectedUser.lastLogin).toLocaleString()}
-              </p>
-            </div>
+            <TextInput
+              label="Full Name"
+              value={selectedUser.name}
+              onChange={(value) => setSelectedUser(prev => prev ? { ...prev, name: value } : prev)}
+            />
+            <TextInput
+              label="Email"
+              type="email"
+              value={selectedUser.email}
+              onChange={(value) => setSelectedUser(prev => prev ? { ...prev, email: value } : prev)}
+            />
+            <SelectInput
+              label="Department"
+              value={selectedUser.department}
+              options={departmentOptions}
+              onChange={(value) => setSelectedUser(prev => prev ? { ...prev, department: value } : prev)}
+            />
+            <button
+              onClick={handleSaveUser}
+              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            >
+              Save Changes
+            </button>
+          </div>
+        ) : selectedUser ? (
+          <div className="space-y-4">
+            <p><strong>Name:</strong> {selectedUser.name}</p>
+            <p><strong>Email:</strong> {selectedUser.email}</p>
+            <p><strong>Role:</strong> {selectedUser.role}</p>
+            <p><strong>Last Login:</strong> {new Date(selectedUser.lastLogin).toLocaleString()}</p>
           </div>
         ) : (
-          <div>
-            <p className="mb-4">This is a modal demo with the following features:</p>
-            <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
-              <li>Portal rendering (rendered outside parent DOM)</li>
-              <li>Accessibility with ARIA labels and focus management</li>
-              <li>Keyboard navigation (Escape to close, Tab trapping)</li>
-              <li>Body scroll lock when open</li>
-              <li>Configurable sizes and close behavior</li>
-            </ul>
-          </div>
+          <p>No user selected</p>
         )}
       </Modal>
 
