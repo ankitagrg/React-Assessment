@@ -47,9 +47,14 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
-      
-      <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl flex flex-col">
+      <div
+        className="absolute inset-0 bg-white/30 backdrop-blur-md transition-opacity duration-300 ease-in-out"
+        onClick={onClose}
+      />
+
+
+      <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl flex flex-col animate-slideIn">
+        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center gap-2">
             <ShoppingBag size={24} />
@@ -63,6 +68,7 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({
           </button>
         </div>
 
+        {/* Items */}
         <div className="flex-1 overflow-y-auto p-6">
           {items.length === 0 ? (
             <div className="text-center py-12">
@@ -81,7 +87,7 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({
                   <div className="flex-1">
                     <h3 className="font-medium text-gray-900">{item.name}</h3>
                     <p className="text-sm text-gray-600">${item.price.toFixed(2)}</p>
-                    
+
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center gap-2">
                         <button
@@ -100,7 +106,7 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({
                           <Plus size={14} />
                         </button>
                       </div>
-                      
+
                       <button
                         onClick={() => onRemoveItem(item.id)}
                         className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
@@ -115,26 +121,11 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({
             </div>
           )}
         </div>
-
         {items.length > 0 && (
           <div className="border-t p-6 space-y-4">
-            <form onSubmit={handleApplyDiscount} className="flex gap-2">
-              <input
-                type="text"
-                value={discountCode}
-                onChange={(e) => setDiscountCode(e.target.value)}
-                placeholder="Discount code"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
-              />
-              <button
-                type="submit"
-                disabled={!discountCode.trim() || isLoading}
-                className="px-4 py-2 bg-gray-600 text-white text-sm rounded-md hover:bg-gray-700 transition-colors disabled:opacity-50"
-              >
-                Apply
-              </button>
-            </form>
+           
 
+            {/* Totals */}
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span>Subtotal:</span>
@@ -160,6 +151,7 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({
               </div>
             </div>
 
+            {/* Checkout */}
             <button
               onClick={onCheckout}
               disabled={isLoading}
@@ -173,3 +165,4 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({
     </div>
   );
 };
+
