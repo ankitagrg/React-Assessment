@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, ReactNode } from 'react';
+import React, { useEffect, useRef } from 'react';
+import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { Portal } from '../common/Portal';
 import type { ModalSize } from '../../types';
@@ -104,8 +105,8 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <Portal>
-      <div 
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 transition-opacity"
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm transition-opacity"
         onClick={closeOnOverlayClick ? onClose : undefined}
       >
         <div
@@ -135,7 +136,7 @@ export const Modal: React.FC<ModalProps> = ({
               <X size={24} />
             </button>
           </div>
-          
+  
           <div className="p-6">
             {children}
           </div>
@@ -143,4 +144,5 @@ export const Modal: React.FC<ModalProps> = ({
       </div>
     </Portal>
   );
+  
 };
